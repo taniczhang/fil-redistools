@@ -37,7 +37,7 @@ func NewRedisCache(db int, host string, defaultExpiration time.Duration) Cache {
 
 
 // string 类型 添加, v 可以是任意类型
-func (c Cache) StringSet(name string, v []byte) error {
+func (c Cache) Set(name string, v []byte) error {
 	conn := c.pool.Get()
 	defer conn.Close()
 	_, err := conn.Do("SET", name, v)
@@ -45,7 +45,7 @@ func (c Cache) StringSet(name string, v []byte) error {
 }
 
 // 获取 字符串类型的值
-func (c Cache) StringGet(name string) ([]byte,error) {
+func (c Cache) Get(name string) ([]byte,error) {
 	conn := c.pool.Get()
 	defer conn.Close()
 	temp, err := redis.Bytes(conn.Do("Get", name))
@@ -134,13 +134,6 @@ func (c Cache) HMget(name string, fields ...string) ([]interface {}, error) {
 	return value, err
 }
 
-// 设置单个值, value 还可以是一个 map slice 等
-func (c Cache) HSet(name string, key string, v[]byte) (err error) {
-	conn := c.pool.Get()
-	defer conn.Close()
-	_, err = conn.Do("HSET", name, key, v)
-	return
-}
 
 // 设置多个值 , obj 可以是指针 slice map struct
 func (c Cache) HMSet(name string, obj interface{}) (err error) {
@@ -150,12 +143,21 @@ func (c Cache) HMSet(name string, obj interface{}) (err error) {
 	return
 }
 
+
 // 获取单个hash 中的值
 func (c Cache) HGet(name, field string) (value []byte,err error) {
 	conn := c.pool.Get()
 	defer conn.Close()
 	temp, err := redis.Bytes(conn.Do("HGET", name, field))
 	return temp,err
+}
+
+// 设置单个值, value 还可以是一个 map slice 等
+func (c Cache) HSet(name string, key string, v[]byte) (err error) {
+	conn := c.pool.Get()
+	defer conn.Close()
+	_, err = conn.Do("HSET", name, key, v)
+	return
 }
 
 // 获取 set 集合中所有的元素, 想要什么类型的自己指定
