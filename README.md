@@ -1,2 +1,2 @@
-# fil-redistools
+redistools
 redis tool
